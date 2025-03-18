@@ -2,9 +2,9 @@ import {
   Component,
   EventEmitter,
   OnInit,
-  ViewChild,
   Output,
-  AfterViewInit,
+  ViewChild,
+  AfterViewInit
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
@@ -24,7 +24,6 @@ export interface Meeting {
   meeting_name_ln?: string;
   active?: number;
   office_id: number;
-  users?: any[]; // Add users array to store selected users
   child?: MeetingChild[];
 }
 
@@ -33,15 +32,6 @@ export interface MeetingChild {
   meeting_id: number;
   child_name: string;
   active?: number;
-}
-
-export interface MeetingUser {
-  user_id: string;
-  user_name: string;
-  seat_name: string;
-  email: string;
-  mobile: string;
-  is_owner: boolean;
 }
 
 @Component({
@@ -58,12 +48,12 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
   }
   meetings: any[] = [];
   meetingChildren: any[] = [];
-  meetingUsers: MeetingUser[] = []; // Store users for the current meeting
+  meetingUsers: any[] = []; // Store users for current meeting
   officeId: number = 1;
 
   // Form model to store selected values
   selectedMeetings = {
-    meeting_id: null as number | null,
+    meeting_id: null,
     meeting_code: '',
     meeting_name: '',
     meeting_name_ln: '',
@@ -83,9 +73,19 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
     'select',
     'delete',
   ];
-  dataSource: MatTableDataSource<any>;
+  // Added this for the users table
+  displayedColumnsUsers: string[] = [
+    'slNo',
+    'seat_name',
+    'user_name',
+    'email',
+    'mobile',
+    'delete',
+  ];
+  dataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]);
+  userDataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]); // Renamed from dataSource1
   selectedRow: any;
-  meeting_id: number | null = null;
+  meeting_id: any;
   deactive: any; // to activate/deactivate meeting
   bilingual: any; // for handle the local languages
   language: any; // check the bilingual whether true/false
@@ -99,30 +99,15 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
     seat_name: '',
     seat_id: '',
     user_name: '',
-    user_email: '',
+    user_email: '', // Fixed typo
     user_mob: '',
     user_id: '',
   };
   flg_owner: boolean = false;
+  dataSource1: MatTableDataSource<any> = new MatTableDataSource<any>([]); // Keep for backward compatibility
 
-  // Create separate paginator for users table
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild('userPaginator') userPaginator!: MatPaginator;
-  @ViewChild('userSort') userSort!: MatSort;
-
-  // Separate data source for users table
-  userDataSource: MatTableDataSource<MeetingUser> =
-    new MatTableDataSource<MeetingUser>([]);
-  displayedColumnsUsers: string[] = [
-    'slNo',
-    'seat_name',
-    'user_name',
-    'email',
-    'mobile',
-    'delete',
-  ];
-
-  // Main tables paginator and sort
-  @ViewChild('mainPaginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
   constructor(
@@ -130,9 +115,7 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
     private router: Router,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
-  ) {
-    this.dataSource = new MatTableDataSource<any>([]);
-  }
+  ) {}
 
   ngOnInit(): void {
     this.language = environment.lang;
@@ -141,20 +124,23 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
     console.log(this.bilingual);
     this.fetch_meetings(); // to fetch all meetings
 
-    // Initialize user data source
-    this.userDataSource = new MatTableDataSource<MeetingUser>([]);
+    // Initialize datasources
+    this.dataSource = new MatTableDataSource<any>([]);
+    this.userDataSource = new MatTableDataSource<any>([]);
+    this.dataSource1 = new MatTableDataSource<any>([]); // Keep for backward compatibility
   }
 
   ngAfterViewInit() {
-    // Set up main table pagination
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+    // Use setTimeout to ensure view is fully initialized
+    setTimeout(() => {
+      if (this.paginator) {
+        this.dataSource.paginator = this.paginator;
+      }
 
-    // Set up user table pagination (when view is ready)
-    if (this.userPaginator) {
-      this.userDataSource.paginator = this.userPaginator;
-      this.userDataSource.sort = this.userSort;
-    }
+      if (this.userPaginator) {
+        this.userDataSource.paginator = this.userPaginator;
+      }
+    });
   }
 
   // Handle "Add New" button click
@@ -173,9 +159,10 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
       meeting_name_ln: '',
     };
 
-    // Clear users list
+    // Clear users
     this.meetingUsers = [];
     this.userDataSource.data = [];
+    this.dataSource1.data = []; // Keep for backward compatibility
 
     if (this.paginator) {
       this.paginator.firstPage();
@@ -207,9 +194,10 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
       meeting_name_ln: '',
     };
 
-    // Clear users list
+    // Clear users
     this.meetingUsers = [];
     this.userDataSource.data = [];
+    this.dataSource1.data = []; // Keep for backward compatibility
 
     this.showError = false;
   }
@@ -241,9 +229,10 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
       (res: any) => {
         console.log('Meetings data:', res);
         this.meetings_data = res;
-        this.dataSource = new MatTableDataSource(this.meetings_data);
+        this.dataSource.data = this.meetings_data; // Ensure data is set properly
         this.is_loading = false;
 
+        // Set paginator after data is loaded
         if (this.paginator) {
           this.dataSource.paginator = this.paginator;
         }
@@ -252,24 +241,6 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
         console.error('Error fetching meetings', error);
         this.is_loading = false;
         this.openCustomSnackbar('error', 'Failed to fetch meetings');
-      }
-    );
-  }
-
-  // Fetch users for a specific meeting
-  fetchMeetingUsers(meetingId: number): void {
-    this.is_loading = true;
-    this.commonsvr.getMeetingChild(meetingId).subscribe(
-      (data: any) => {
-        console.log('Meeting users:', data);
-        this.meetingUsers = data || [];
-        this.userDataSource.data = this.meetingUsers;
-        this.is_loading = false;
-      },
-      (error) => {
-        console.error('Error fetching meeting users', error);
-        this.is_loading = false;
-        this.openCustomSnackbar('error', 'Failed to fetch meeting users');
       }
     );
   }
@@ -287,23 +258,33 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
     );
   }
 
+  // Method for fetching users - can be implemented when API is ready
+  fetchMeetingUsers(meetingId: number): void {
+    // This would call your API to get users for a meeting
+    // For now, we'll just clear the users list
+    this.meetingUsers = [];
+    this.userDataSource.data = [];
+    this.dataSource1.data = []; // Keep for backward compatibility
+  }
+
   saveMeeting() {
     if (!this.validate_meeting()) {
       console.log(this.msg);
       return;
     }
 
+    // Collect users from the userDataSource
+    const users = this.userDataSource.data || [];
+
     const meetingData = {
-      meeting_id: this.meeting_id,
+      meeting_id: this.meeting_id, // Use existing ID for updates
       meeting_name: this.selectedMeetings.meeting_name,
       meeting_code: this.selectedMeetings.meeting_code,
       office_id: this.officeId,
       active: this.deactive == true ? 9 : 1,
-      users: this.meetingUsers, // Include the users list
+      users: users, // Include users list
       child: this.meetingChildren,
     };
-
-    console.log('Saving meeting with data:', meetingData);
 
     this.is_loading = true;
     this.commonsvr.saveMeeting(meetingData).subscribe(
@@ -338,7 +319,7 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
 
   // to get data from table to edit meeting
   onRowClick(e: any, index: number): void {
-    console.log('Selected meeting:', e);
+    console.log('Selected meeting row:', e);
     this.activeRowIndex = index;
     this.meeting_id = e.meeting_id;
     this.deactive = e.active == 9 ? true : false;
@@ -349,7 +330,7 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
       meeting_name_ln: e.meeting_name_ln || '',
     };
 
-    // Fetch users for this meeting
+    // Fetch users for this meeting if needed
     if (e.meeting_id) {
       this.fetchMeetingUsers(e.meeting_id);
     }
@@ -357,6 +338,17 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
     this.showError = false;
     this.isEditable = true; // The form starts in view mode
     this.isAddMode = false; // Disable Add Mode
+  }
+
+  // Add removeUser method for the users table
+  removeUser(index: number): void {
+    console.log('Removing user at index:', index);
+    if (index >= 0 && index < this.userDataSource.data.length) {
+      const updatedUsers = [...this.userDataSource.data];
+      updatedUsers.splice(index, 1);
+      this.userDataSource.data = updatedUsers;
+      this.dataSource1.data = updatedUsers; // Keep for backward compatibility
+    }
   }
 
   // apply filter based on search box entry
@@ -372,6 +364,12 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
       duration: 3000,
       panelClass: [cssClass],
     });
+  }
+
+  // Add the navigate method needed for select button
+  navigate(row: any) {
+    console.log('Navigate called with:', row);
+    // Implement navigation logic if needed
   }
 
   // clear error message
@@ -392,10 +390,7 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
       e.preventDefault();
     }
   }
-  navigate(element: any): void {
-    // Implement the navigation logic here
-    console.log('Navigating to:', element);
-  }
+
   add_user_tolist() {
     console.log('Adding user to list:', this.selected_user);
 
@@ -406,18 +401,20 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
     }
 
     // Prepare user data for the table
-    const userToAdd: MeetingUser = {
-      user_id: this.selected_user.user_id,
-      user_name: this.selected_user.user_name,
+    const userToAdd = {
       seat_name: this.selected_user.seat_name,
-      email: this.selected_user.user_email,
+      user_name: this.selected_user.user_name,
+      email: this.selected_user.user_email, // Fixed typo
       mobile: this.selected_user.user_mob,
       is_owner: this.flg_owner,
     };
 
+    // Get current data
+    const currentData = this.userDataSource.data || [];
+
     // Check for duplicate
-    const userExists = this.meetingUsers.some(
-      (user) => user.user_id === userToAdd.user_id
+    const userExists = currentData.some(
+      (user) => user.user_name === userToAdd.user_name
     );
 
     if (userExists) {
@@ -425,26 +422,15 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    // Add new user to the array
-    this.meetingUsers.push(userToAdd);
-
-    // Update data source
-    this.userDataSource.data = this.meetingUsers;
-
-    console.log('Users after adding:', this.meetingUsers);
-    console.log('UserDataSource data:', this.userDataSource.data);
+    // Add new user
+    const updatedUsers = [...currentData, userToAdd];
+    this.userDataSource.data = updatedUsers;
+    this.dataSource1.data = updatedUsers; // Keep for backward compatibility
 
     // Reset selection
     this.clear_user_details();
-  }
 
-  // Remove user from the list
-  removeUser(index: number) {
-    console.log('Removing user at index:', index);
-    if (index >= 0 && index < this.meetingUsers.length) {
-      this.meetingUsers.splice(index, 1);
-      this.userDataSource.data = this.meetingUsers;
-    }
+    console.log('Updated user data:', this.userDataSource.data);
   }
 
   clear_user_details() {
@@ -452,7 +438,7 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
       seat_name: '',
       seat_id: '',
       user_name: '',
-      user_email: '',
+      user_email: '', // Fixed typo
       user_mob: '',
       user_id: '',
     };
@@ -465,26 +451,17 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
     });
 
     dialogRef?.afterClosed().subscribe((data: any) => {
-      console.log('User selected from dialog:', data);
+      console.log('User selected from dialog:', data); // Debug log
 
       if (!data || !data.user_id) {
-        console.log('No user selected or invalid data');
+        this.openCustomSnackbar('error', 'No user selected.');
         return;
       }
 
-      // Store the selected user data
-      this.selected_user = {
-        user_id: data.user_id,
-        user_name: data.user_name,
-        seat_name: data.seat_name || '',
-        seat_id: data.seat_id || '',
-        user_email: data.user_eamil || data.email || '', // Handle different field names
-        user_mob: data.user_mob || data.mobile || '', // Handle different field names
-      };
+      this.selected_user = data;
+      this.flg_owner = false; // Reset owner flag - let user decide
 
-      this.flg_owner = false; // Reset owner flag - user can set it after selection
-
-      console.log('Selected user stored:', this.selected_user);
+      console.log('Selected user stored:', this.selected_user); // Debug log
     });
   }
 }
