@@ -4,7 +4,7 @@ import {
   OnInit,
   Output,
   ViewChild,
-  AfterViewInit
+  AfterViewInit,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
@@ -260,13 +260,26 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
 
   // Method for fetching users - can be implemented when API is ready
   fetchMeetingUsers(meetingId: number): void {
-    // This would call your API to get users for a meeting
-    // For now, we'll just clear the users list
-    this.meetingUsers = [];
-    this.userDataSource.data = [];
-    this.dataSource1.data = []; // Keep for backward compatibility
-  }
+    this.is_loading = true;
+    this.commonsvr.getMeetingUsers(meetingId).subscribe(
+      (data: any) => {
+        this.meetingUsers = data || [];
+        this.userDataSource.data = this.meetingUsers;
+        this.is_loading = false;
 
+        // Set paginator after data is loaded
+        if (this.userPaginator) {
+          this.userDataSource.paginator = this.userPaginator;
+        }
+      },
+      (error) => {
+        console.error('Error fetching meeting users', error);
+        this.openCustomSnackbar('error', 'Failed to fetch meeting users');
+        this.is_loading = false;
+      }
+    );
+  }
+  
   saveMeeting() {
     if (!this.validate_meeting()) {
       console.log(this.msg);
@@ -336,7 +349,7 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
     }
 
     this.showError = false;
-    this.isEditable = true; // The form starts in view mode
+    this.isEditable = false; // The form starts in view mode
     this.isAddMode = false; // Disable Add Mode
   }
 
