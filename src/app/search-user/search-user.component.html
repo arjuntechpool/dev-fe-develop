@@ -3,6 +3,11 @@
   [buttons]="modalButtons"
   class="admin-modal admin-layout"
 >
+  <!-- Visual indication of selected user -->
+  <div *ngIf="selectedUser" class="selected-user-info alert alert-info mb-2">
+    <p class="mb-0">Selected User: <strong>{{selectedUser.user_name}}</strong> ({{selectedUser.designation}})</p>
+  </div>
+
   <div class="search-flex-outer">
     <div class="left-side">
       <div class="search-wrap">
@@ -13,8 +18,9 @@
             id="search01"
             placeholder="Search by EmpCode"
             class="form-control md"
+            (keyup)="applyFilter($event)"
           />
-          <button class="btn btn-primary-80 sm search-btn">Go</button>
+          <button class="btn btn-primary-80 sm search-btn" (click)="applyFilter($event)">Go</button>
         </div>
       </div>
     </div>
@@ -43,31 +49,48 @@
           <div class="row gy-3">
             <div class="col-md-4">
               <div class="form-group">
-                <label for="subj" class="form-label">Department</label>
-                <select name="subj" id="" class="form-select md">
-                  <option value="1">Choose Department</option>
-                  <option value="2">Dept1</option>
-                  <option value="3">Dept2</option>
+                <label for="department" class="form-label">Department</label>
+                <select
+                  name="department"
+                  id="department"
+                  class="form-select md"
+                  [(ngModel)]="searchCriteria.department">
+                  <option value="">Choose Department</option>
+                  <option value="designation1">Dept1</option>
+                  <option value="designation2">Dept2</option>
+                  <option value="designation3">Dept3</option>
+                  <option value="designation4">Dept4</option>
                 </select>
               </div>
             </div>
             <div class="col-md-4">
               <div class="form-group">
-                <label for="subj2" class="form-label">Choose Section</label>
-                <select name="subj2" id="" class="form-select md">
-                  <option value="1">Choose Section</option>
-                  <option value="2">Subject</option>
-                  <option value="3">Subject</option>
+                <label for="section" class="form-label">Choose Section</label>
+                <select
+                  name="section"
+                  id="section"
+                  class="form-select md"
+                  [(ngModel)]="searchCriteria.section">
+                  <option value="">Choose Section</option>
+                  <option value="section1">Section 1</option>
+                  <option value="section2">Section 2</option>
+                  <option value="section3">Section 3</option>
                 </select>
               </div>
             </div>
             <div class="col-md-4">
               <div class="form-group">
-                <label for="subj3" class="form-label">Seat</label>
-                <select name="subj2" id="" class="form-select md">
-                  <option value="1">Choose Seat</option>
-                  <option value="2">Subject</option>
-                  <option value="3">Subject</option>
+                <label for="seat" class="form-label">Seat</label>
+                <select
+                  name="seat"
+                  id="seat"
+                  class="form-select md"
+                  [(ngModel)]="searchCriteria.seat">
+                  <option value="">Choose Seat</option>
+                  <option value="seat01">Seat 01</option>
+                  <option value="seat02">Seat 02</option>
+                  <option value="seat03">Seat 03</option>
+                  <option value="seat04">Seat 04</option>
                 </select>
               </div>
             </div>
@@ -75,43 +98,46 @@
           <div class="row gy-3">
             <div class="col-md-4">
               <div class="form-group">
-                <label for="subj" class="form-label">Employee Name</label>
+                <label for="empName" class="form-label">Employee Name</label>
                 <input
                   type="text"
-                  name="search"
-                  id="search02"
+                  name="empName"
+                  id="empName"
                   placeholder="Type emp.Name"
                   class="form-control md"
+                  [(ngModel)]="searchCriteria.empName"
                 />
               </div>
             </div>
             <div class="col-md-4">
               <div class="form-group">
-                <label for="subj" class="form-label">Mobile No</label>
+                <label for="mobile" class="form-label">Mobile No</label>
                 <input
                   type="text"
-                  name="search"
-                  id="search03"
+                  name="mobile"
+                  id="mobile"
                   placeholder="Type Mobile No."
                   class="form-control md"
+                  [(ngModel)]="searchCriteria.mobile"
                 />
               </div>
             </div>
             <div class="col-md-3">
               <div class="form-group">
-                <label for="subj" class="form-label">email </label>
+                <label for="email" class="form-label">Email</label>
                 <input
                   type="text"
-                  name="search"
-                  id="search04"
+                  name="email"
+                  id="email"
                   placeholder="Type email"
                   class="form-control md"
+                  [(ngModel)]="searchCriteria.email"
                 />
               </div>
             </div>
             <div class="col-md-1">
-              <label for="subj" class="form-label"> </label>
-              <button class="btn btn-primary-80 sm search-btn">Search</button>
+              <label for="search" class="form-label">&nbsp;</label>
+              <button class="btn btn-primary-80 sm search-btn" (click)="advancedSearch()">Search</button>
             </div>
           </div>
         </div>

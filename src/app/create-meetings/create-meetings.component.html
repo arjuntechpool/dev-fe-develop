@@ -105,7 +105,7 @@
                                           <div class="table-wrap file-box-wrap pagination-included" style="height: calc(70vh - 20rem);">
                                             <table
                                               mat-table
-                                              [dataSource]="dataSource1"
+                                              [dataSource]="userDataSource"
                                               class="w-100 admin-table file-table"
                                             >
                                               <!-- Sl No Column -->
@@ -151,19 +151,19 @@
                                               </ng-container>
 
                                               <!-- Header and Row Definitions -->
-                                              <tr mat-header-row *matHeaderRowDef="displayedColumns1"></tr>
-                                              <tr mat-row *matRowDef="let row; columns: displayedColumns1;"></tr>
+                                              <tr mat-header-row *matHeaderRowDef="displayedColumnsUsers"></tr>
+                                              <tr mat-row *matRowDef="let row; columns: displayedColumnsUsers;"></tr>
                                             </table>
 
                                             <!-- No data message -->
-                                            <div *ngIf="!dataSource1 || dataSource1.data.length === 0" class="text-center p-3">
+                                            <div *ngIf="!userDataSource || userDataSource.data.length === 0" class="text-center p-3">
                                               No users added yet
                                             </div>
                                           </div>
 
                                           <!-- Paginator -->
                                         <mat-paginator
-                                            *ngIf="dataSource1 && dataSource1.data.length > 0"
+                                            *ngIf="userDataSource && userDataSource.data.length > 0"
                                             [pageSizeOptions]="[5, 10, 25, 100]"
                                             showFirstLastButtons
                                         ></mat-paginator>
@@ -197,7 +197,7 @@
 
                                         <!-- Show Add New or Edit button when form is not editable -->
                                         <button *ngIf="isEditable && !isAddMode" class="sm btn btn-primary-90 add-btn"
-                                            (click)="editSubject()">{{"Edit" | translate}}</button>
+                                            (click)="editMeeting()">{{"Edit" | translate}}</button>
                                         <button *ngIf="isEditable && !isAddMode"
                                             class="sm btn btn-outline-primary-90 edit-btn" (click)="addNewMeeting()">{{"Add New" | translate}}
                                             </button>
