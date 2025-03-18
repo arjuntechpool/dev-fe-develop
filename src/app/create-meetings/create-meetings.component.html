@@ -102,56 +102,71 @@
                                         </div>
 
                                         <div class="left-column col-md-12">
-                                            <div class="table-wrap file-box-wrap pagination-included" style="height: calc(70vh - 20rem);">
-                                                <table mat-table [dataSource]="dataSource1" class="w-100 admin-table file-table">
+                                          <div class="table-wrap file-box-wrap pagination-included" style="height: calc(70vh - 20rem);">
+                                            <table
+                                              mat-table
+                                              [dataSource]="dataSource1"
+                                              class="w-100 admin-table file-table"
+                                            >
+                                              <!-- Sl No Column -->
+                                              <ng-container matColumnDef="slNo">
+                                                <th mat-header-cell *matHeaderCellDef> Sl No </th>
+                                                <td mat-cell *matCellDef="let element; let i = index">
+                                                  <span class="badge bg-gray-15 code-badge xs">{{i+1}}</span>
+                                                </td>
+                                              </ng-container>
 
-                                                    <!-- Module Column -->
-                                                    <ng-container matColumnDef="slNo">
-                                                        <th mat-header-cell *matHeaderCellDef> Sl No </th>
-                                                        <td mat-cell *matCellDef="let element = index"> <span
-                                                                class="badge bg-gray-15 code-badge xs">{{element+1}}</span></td>
-                                                    </ng-container>
+                                              <!-- Seat Name Column -->
+                                              <ng-container matColumnDef="seat_name">
+                                                <th mat-header-cell *matHeaderCellDef> Seat </th>
+                                                <td mat-cell *matCellDef="let element">{{element.seat_name}}</td>
+                                              </ng-container>
 
-                                                    <!-- Code -->
-                                                    <ng-container matColumnDef="seat_name">
-                                                        <th mat-header-cell *matHeaderCellDef> Seat </th>
-                                                        <td mat-cell *matCellDef="let element">{{element.seat_name}} </td>
-                                                    </ng-container>
-                                                    <ng-container matColumnDef="user_name">
-                                                        <th mat-header-cell *matHeaderCellDef> User </th>
-                                                        <td mat-cell *matCellDef="let element">{{element.user_name}} </td>
-                                                    </ng-container>
+                                              <!-- User Name Column -->
+                                              <ng-container matColumnDef="user_name">
+                                                <th mat-header-cell *matHeaderCellDef> User </th>
+                                                <td mat-cell *matCellDef="let element">{{element.user_name}}</td>
+                                              </ng-container>
 
-                                                    <!--  Head -->
+                                              <!-- Email Column -->
+                                              <ng-container matColumnDef="email">
+                                                <th mat-header-cell *matHeaderCellDef> Email </th>
+                                                <td mat-cell *matCellDef="let element">{{element.email}}</td>
+                                              </ng-container>
 
-                                                    <ng-container matColumnDef="email">
-                                                        <th mat-header-cell *matHeaderCellDef> email </th>
-                                                        <td mat-cell *matCellDef="let element"> {{element.email}} </td>
-                                                    </ng-container>
-                                                    <ng-container matColumnDef="mobile">
-                                                        <th mat-header-cell *matHeaderCellDef> Mobile </th>
-                                                        <td mat-cell *matCellDef="let element"> {{element.mobile}} </td>
-                                                    </ng-container>
+                                              <!-- Mobile Column -->
+                                              <ng-container matColumnDef="mobile">
+                                                <th mat-header-cell *matHeaderCellDef> Mobile </th>
+                                                <td mat-cell *matCellDef="let element">{{element.mobile}}</td>
+                                              </ng-container>
 
+                                              <!-- Delete Column -->
+                                              <ng-container matColumnDef="delete">
+                                                <th mat-header-cell *matHeaderCellDef></th>
+                                                <td mat-cell *matCellDef="let element; let i = index">
+                                                  <a role="button" (click)="onRowClick(element, i)">
+                                                    <i class="icon icon-delete"></i>
+                                                  </a>
+                                                </td>
+                                              </ng-container>
 
+                                              <!-- Header and Row Definitions -->
+                                              <tr mat-header-row *matHeaderRowDef="displayedColumns1"></tr>
+                                              <tr mat-row *matRowDef="let row; columns: displayedColumns1;"></tr>
+                                            </table>
 
-
-                                                    <ng-container matColumnDef="delete">
-                                                        <th mat-header-cell *matHeaderCellDef></th>
-                                                        <td mat-cell *matCellDef="let element; let i = index"> <a role="button"><i
-                                                                    class="icon icon-delete" (click)="onRowClick(element,i)"></i> </a>
-                                                        </td>
-                                                    </ng-container>
-
-
-                                                    <!-- Header and Row Definitions -->
-                                                    <tr mat-header-row *matHeaderRowDef="displayedColumns1"></tr>
-                                                    <tr mat-row *matRowDef="let row; columns: displayedColumns1;"></tr>
-                                                </table>
+                                            <!-- No data message -->
+                                            <div *ngIf="!dataSource1 || dataSource1.data.length === 0" class="text-center p-3">
+                                              No users added yet
                                             </div>
+                                          </div>
 
-                                            <!-- MatPaginator for Pagination -->
-                                            <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" showFirstLastButtons></mat-paginator>
+                                          <!-- Paginator -->
+                                        <mat-paginator
+                                            *ngIf="dataSource1 && dataSource1.data.length > 0"
+                                            [pageSizeOptions]="[5, 10, 25, 100]"
+                                            showFirstLastButtons
+                                        ></mat-paginator>
                                         </div>
 
 
@@ -184,7 +199,7 @@
                                         <button *ngIf="isEditable && !isAddMode" class="sm btn btn-primary-90 add-btn"
                                             (click)="editSubject()">{{"Edit" | translate}}</button>
                                         <button *ngIf="isEditable && !isAddMode"
-                                            class="sm btn btn-outline-primary-90 edit-btn" (click)="addNewSubject()">{{"Add New" | translate}}
+                                            class="sm btn btn-outline-primary-90 edit-btn" (click)="addNewMeeting()">{{"Add New" | translate}}
                                             </button>
                                     </div>
                                 </div>
