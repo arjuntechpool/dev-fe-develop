@@ -6,8 +6,9 @@ export const environment = {
   production: false,
   lang:'മലയാളം',
   bilingual:true,
-  serviceUrl:"http://localhost:9093",
-  ssoUrl:"http://localhost:9091",
+  serviceUrl:"http://192.168.1.34:9093",
+  ssoUrl:"http://192.168.1.34:9091",
+  baseUrl: 'http://localhost:9093/api/v0',
 };
 
 /*
