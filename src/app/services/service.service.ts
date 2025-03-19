@@ -17,15 +17,9 @@ export class ServiceService {
   getMeetings(officeId: number): Observable<any> {
     return this.getService('api/v0/get_meetings', { officeId: officeId });
   }
-  
-  getMeetingUsers(meetingId: number): Observable<any> {
-    return this.getService(`api/v0/meetings/${meetingId}/users`);
-  }
 
   getMeetingChild(meetingId: number): Observable<any> {
-    return this.getService('api/v0/get_meeting_child', {
-      meeting_id: meetingId,
-    });
+    return this.getService('api/v0/get_meeting_child', { meeting_id: meetingId });
   }
 
   // GET METHOD

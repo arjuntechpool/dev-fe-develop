@@ -162,7 +162,7 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
     // Clear users
     this.meetingUsers = [];
     this.userDataSource.data = [];
-    this.dataSource1.data = []; // Keep for backward compatibility
+    // this.dataSource1.data = []; // Keep for backward compatibility
 
     if (this.paginator) {
       this.paginator.firstPage();
@@ -197,7 +197,7 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
     // Clear users
     this.meetingUsers = [];
     this.userDataSource.data = [];
-    this.dataSource1.data = []; // Keep for backward compatibility
+    // this.dataSource1.data = []; // Keep for backward compatibility
 
     this.showError = false;
   }
@@ -261,7 +261,7 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
   // Method for fetching users - can be implemented when API is ready
   fetchMeetingUsers(meetingId: number): void {
     this.is_loading = true;
-    this.commonsvr.getMeetingUsers(meetingId).subscribe(
+    this.commonsvr.getMeetingChild(meetingId).subscribe(
       (data: any) => {
         this.meetingUsers = data || [];
         this.userDataSource.data = this.meetingUsers;
@@ -279,7 +279,7 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
       }
     );
   }
-  
+
   saveMeeting() {
     if (!this.validate_meeting()) {
       console.log(this.msg);
@@ -327,7 +327,6 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
 
   onMeetingSelect(meetingId: number): void {
     this.fetchMeetingChildren(meetingId);
-    this.fetchMeetingUsers(meetingId);
   }
 
   // to get data from table to edit meeting
@@ -423,7 +422,7 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
     };
 
     // Get current data
-    const currentData = this.userDataSource.data || [];
+    const currentData = this.dataSource1.data || [];
 
     // Check for duplicate
     const userExists = currentData.some(
@@ -437,13 +436,13 @@ export class CreateMeetingsComponent implements OnInit, AfterViewInit {
 
     // Add new user
     const updatedUsers = [...currentData, userToAdd];
-    this.userDataSource.data = updatedUsers;
+    // this.userDataSource.data = updatedUsers;
     this.dataSource1.data = updatedUsers; // Keep for backward compatibility
 
     // Reset selection
     this.clear_user_details();
 
-    console.log('Updated user data:', this.userDataSource.data);
+    console.log('Updated user data:', this.dataSource1.data);
   }
 
   clear_user_details() {
